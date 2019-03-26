@@ -1,4 +1,2 @@
 # springSecurityDemo
-例子
-
-test
+## TestSpring 使用javaconfig 代码东平西凑勉强跑起来的例子
