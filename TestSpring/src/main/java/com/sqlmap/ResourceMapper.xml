@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mapper.ResourceMapper">
+    <resultMap id="BaseResultMap" type="com.model.Resource">
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="path" property="path" jdbcType="VARCHAR"/>
+        <result column="level" property="level" jdbcType="VARCHAR"/>
+        <result column="seq_num" property="seqNum" jdbcType="BIGINT"/>
+        <collection property="roles" ofType="com.model.Role" javaType="java.util.HashSet">
+            <result column="role_key" property="roleKey" jdbcType="VARCHAR"/>
+            <result column="role_desc" property="roleDesc" jdbcType="VARCHAR"/>
+        </collection>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+      id, name, path, level, seq_num
+    </sql>
+
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        from resourse
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectResourceRole" resultMap="BaseResultMap">
+        SELECT
+            rs.id,
+            rs.name,
+            rs.path,
+            rs.level,
+            rs.seq_num,
+            r.role_key,
+            r.role_desc
+        FROM
+            resource AS rs
+        LEFT JOIN role_resource AS rr ON rr.resourse_id = rs.id
+        LEFT JOIN role AS r ON r.id = rr.role_id
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from resourse
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertSelective" parameterType="com.model.Resource">
+        insert into resourse
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="name != null">
+                name,
+            </if>
+            <if test="path != null">
+                path,
+            </if>
+            <if test="level != null">
+                level,
+            </if>
+            <if test="seqNum != null">
+                seq_num,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="name != null">
+                #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="level != null">
+                #{level,jdbcType=VARCHAR},
+            </if>
+            <if test="seqNum != null">
+                #{seqNum,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.model.Resource">
+        update resourse
+        <set>
+            <if test="name != null">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="path != null">
+                path = #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="level != null">
+                level = #{level,jdbcType=VARCHAR},
+            </if>
+            <if test="seqNum != null">
+                seq_num = #{seqNum,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>
