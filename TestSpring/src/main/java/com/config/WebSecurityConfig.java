@@ -1,23 +1,17 @@
 package com.config;
 
 import com.security.MyAbstractSecurityInterceptor;
-import com.security.MyAccessDecisionManager;
+import com.security.handler.MyAccessDeniedHandler;
 import com.security.MyUserDetailsService;
+import com.security.handler.MyAuthenticationFailureHandler;
+import com.security.handler.MyAuthenticationSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author jiHongYuan
@@ -28,11 +22,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    // 查用户的role
     @Autowired
     private MyUserDetailsService myUserDetailsService;
+
     @Autowired
     private MyAbstractSecurityInterceptor myAbstractSecurityInterceptor;
-
+    // 没权限的到这里
+    @Autowired
+    private MyAccessDeniedHandler myAccessDeniedHandler;
+    @Autowired
+    private MyAuthenticationSuccessHandler myAuthenticationSuccessHandler;
+    @Autowired
+    private MyAuthenticationFailureHandler myAuthenticationFailureHandler;
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(myUserDetailsService);
@@ -43,7 +45,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                     .anyRequest().authenticated()
-                    .antMatchers("/admin/**").hasRole("ADMIN")
                     .and()
 
                 .logout()
@@ -54,12 +55,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .formLogin()
                     .loginPage("/login.jsp")
                     .permitAll()
-                    .successForwardUrl("/admin/index.jsp")
+                    .successHandler(myAuthenticationSuccessHandler)
+                    .failureHandler(myAuthenticationFailureHandler)
                     .and()
 
                 .httpBasic()
                     .and()
-                .addFilterBefore(myAbstractSecurityInterceptor, FilterSecurityInterceptor.class);
+
+                .addFilterBefore(myAbstractSecurityInterceptor, FilterSecurityInterceptor.class)
+                .exceptionHandling()
+                    .accessDeniedHandler(myAccessDeniedHandler);
     }
 
 }
