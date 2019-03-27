@@ -5,12 +5,14 @@ import com.security.handler.MyAccessDeniedHandler;
 import com.security.MyUserDetailsService;
 import com.security.handler.MyAuthenticationFailureHandler;
 import com.security.handler.MyAuthenticationSuccessHandler;
+import com.security.handler.MyLogoutSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
 
 /**
@@ -35,9 +37,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private MyAuthenticationSuccessHandler myAuthenticationSuccessHandler;
     @Autowired
     private MyAuthenticationFailureHandler myAuthenticationFailureHandler;
+    @Autowired
+    private MyLogoutSuccessHandler myLogoutSuccessHandler;
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(myUserDetailsService);
+        auth.userDetailsService(myUserDetailsService).passwordEncoder(new BCryptPasswordEncoder());;
     }
 
     @Override
@@ -46,10 +50,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                     .anyRequest().authenticated()
                     .and()
-
                 .logout()
                     .logoutUrl("/logout")
                     .invalidateHttpSession(true)
+                    .logoutSuccessHandler(myLogoutSuccessHandler)
                     .and()
 
                 .formLogin()
@@ -63,8 +67,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .and()
 
                 .addFilterBefore(myAbstractSecurityInterceptor, FilterSecurityInterceptor.class)
-                .exceptionHandling()
-                    .accessDeniedHandler(myAccessDeniedHandler);
+                    .exceptionHandling()
+                    .accessDeniedHandler(myAccessDeniedHandler)
+                    .and()
+                .csrf().disable();
     }
 
 }
