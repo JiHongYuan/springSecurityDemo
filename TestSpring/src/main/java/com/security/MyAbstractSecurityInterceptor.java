@@ -30,9 +30,6 @@ public class MyAbstractSecurityInterceptor extends AbstractSecurityInterceptor i
         super.setAccessDecisionManager(myAccessDecisionManager);
     }
 
-    @Resource
-    private AuthenticationConfiguration authenticationConfiguration;
-
     @Override
     public SecurityMetadataSource obtainSecurityMetadataSource() {
         return myFilterSecurityMetadataSource;
