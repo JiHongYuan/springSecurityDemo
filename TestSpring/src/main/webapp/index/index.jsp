@@ -12,5 +12,6 @@
 </head>
 <body>
 <h1>index</h1>
+<h2><a href="http://localhost:8080/logout">登出</a></h2>
 </body>
 </html>
